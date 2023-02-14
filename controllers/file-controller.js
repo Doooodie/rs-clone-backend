@@ -10,18 +10,13 @@ const __dirname = path.dirname(__filename);
 
 class FileController {
     async create(req, res, next) {
-        console.log('file-controller: create');
-
         try {
             let { name, size, info, userId } = req.body;
-            console.log('name = ' + name + ', size = ' + size + ', info = ' + info + ', userId = ' + userId);
             const { img } = req.files;
 
-            // сгенерить уникальное имя пересылаемого файла в папке PUBLIC - куда он загрузится
             let fileName = uuidv4() + ".jpg";
             img.mv(path.resolve(__dirname, '..', 'public', fileName));
 
-            // const imageFile = await file.create({ name, size, info, img: fileName, userId });
             const imageFile = await file.create({ name, size, info, img: fileName });
 
             res.json(imageFile);
@@ -32,21 +27,19 @@ class FileController {
     };
 
     async delete(req, res) {
-        console.log('file-controller: delete');
         res.json({ message: 'file-controller: delete'});
     }
 
     async get(req, res, next) {
-        console.log('file-controller: get');
         try {
             const { id } = req.params;
             const file = await file.findOne({ where: { id } });
 
-            res.json(`что-то прочитал id=${id}`);
+            res.json(`something was read... id=${id}`);
         } catch(e) {
             next(ApiError.badRequest(e.message));
         }
-        res.json({ message: `file-controller: get file id = `});
+        res.json({ message: `file-controller: get file id = ${req.params}`});
     }
 }
 
