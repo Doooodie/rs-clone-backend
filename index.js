@@ -1,7 +1,7 @@
 import express from 'express';
 import sequelize from './db.js';
 import cors from 'cors';
-import { user, file, access, comment } from './models/models.js';
+import { User, File, Access, Comment } from './models/models.js';
 import router from './routes/index.js';
 import errorHandler from './middleware/errorHandlingMiddleware.js'
 import fileUpload from 'express-fileupload';

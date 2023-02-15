@@ -1,7 +1,7 @@
 import sequelize from '../db.js';
 import { DataTypes } from 'sequelize';
 
-export const user = sequelize.define('user', {
+export const User = sequelize.define('user', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -16,41 +16,44 @@ export const user = sequelize.define('user', {
             unique: true,
         },
         password: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
         },
     },  {
         timestamps: false,
     }
 );
 
-export const file = sequelize.define('file', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-        primaryKey: false,
-    },
-    size: {
-        type: DataTypes.INTEGER,
-        primaryKey: false,
-    },
-    info: {
-        type: DataTypes.STRING,
-        unique: false,
-    },
-    img: {
-        type: DataTypes.STRING,
-        unique: true,
-    }, }, 
-    {
-        timestamps: false,
+export const File = sequelize.define('file', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        name: {
+            type: DataTypes.STRING,
+            primaryKey: false,
+        },
+        size: {
+            type: DataTypes.INTEGER,
+            primaryKey: false,
+        },
+        info: {
+            type: DataTypes.STRING,
+            unique: false,
+        },
+        img: {
+            type: DataTypes.STRING,
+            unique: true,
+        },
+        isFile: {
+            type: DataTypes.BOOLEAN,
+        }
+    },  {
+        timestamps: true,
     }
 );
 
-export const comment = sequelize.define('comment', {
+export const Comment = sequelize.define('comment', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -65,28 +68,28 @@ export const comment = sequelize.define('comment', {
     }
 );
 
-export const access = sequelize.define('access', {
+export const Access = sequelize.define('access', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
-    }, {
+    },  {
         timestamps: false,
     }
 );
 
-user.hasMany(file, { foreignKey: 'userId' });
-file.belongsTo(user);
+User.hasMany(File, { foreignKey: 'userId' });
+File.belongsTo(User);
 
-user.hasMany(comment, { foreignKey: 'userId' });
-comment.belongsTo(user);
+User.hasMany(Comment, { foreignKey: 'userId' });
+Comment.belongsTo(User);
 
-file.hasMany(comment, { foreignKey: 'fileId' });
-comment.belongsTo(file);
+File.hasMany(Comment, { foreignKey: 'fileId' });
+Comment.belongsTo(File);
 
-user.hasMany(access, { foreignKey: 'userId' });
-access.belongsTo(user);
+User.hasMany(Access, { foreignKey: 'userId' });
+Access.belongsTo(User);
 
-file.hasMany(access, { foreignKey: 'fileId' });
-access.belongsTo(file);
+File.hasMany(Access, { foreignKey: 'fileId' });
+Access.belongsTo(File);
