@@ -55,8 +55,6 @@ class UserController {
 
             // create a folder for new user into /PUBLIC
             try {
-                // await fs.mkdir(`${__dirname}/../public/${name}`);
-                // await fs.mkdir(path.resolve(__dirname, '..', 'public', `${name}`));
                 await fs.mkdir(path.resolve(__dirname, '..', 'public', `${newUser.name}`));
             } catch(e) {
                 next(ApiError.internal(e.message));

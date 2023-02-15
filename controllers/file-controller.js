@@ -17,11 +17,9 @@ class FileController {
             console.log(`name = ${name}, size = ${size}, info = ${info}, isFile = ${isFile}, userId = ${userId}`);
             const { img } = req.files;
 
-            // сгенерить уникальное имя пересылаемого файла в папке PUBLIC - куда он загрузится
             let fileName = uuidv4() + ".jpg";
             img.mv(path.resolve(__dirname, '..', 'public', fileName));
 
-            // const imageFile = await file.create({ name, size, info, img: fileName, userId });
             const imageFile = await File.create({ name, size, info, img: fileName });
 
             res.json(imageFile);
