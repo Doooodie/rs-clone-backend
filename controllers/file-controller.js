@@ -14,7 +14,6 @@ class FileController {
 
         try {
             let { name, size, info, isFile, userId } = req.body;
-            console.log(`name = ${name}, size = ${size}, info = ${info}, isFile = ${isFile}, userId = ${userId}`);
             const { img } = req.files;
 
             let fileName = uuidv4() + ".jpg";
@@ -40,7 +39,7 @@ class FileController {
             const { id } = req.params;
             const file = await File.findOne({ where: { id } });
 
-            res.json(`что-то прочитал id=${id}`);
+            res.json(`read id=${id}`);
         } catch(e) {
             next(ApiError.badRequest(e.message));
         }
