@@ -5,21 +5,21 @@ export const user = sequelize.define('user', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
         },
         name: {
             type: DataTypes.STRING,
-            unique: true
+            unique: true,
         },
         email: {
             type: DataTypes.STRING,
-            unique: true
+            unique: true,
         },
         password: {
             type: DataTypes.STRING
         },
     },  {
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -27,7 +27,7 @@ export const file = sequelize.define('file', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
     },
     name: {
         type: DataTypes.STRING,
@@ -39,14 +39,14 @@ export const file = sequelize.define('file', {
     },
     info: {
         type: DataTypes.STRING,
-        unique: false
+        unique: false,
     },
     img: {
         type: DataTypes.STRING,
-        unique: true
+        unique: true,
     }, }, 
     {
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -54,14 +54,14 @@ export const comment = sequelize.define('comment', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
         },
         text: {
             type: DataTypes.STRING,
-            unique: false
+            unique: false,
         },
     }, {
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -69,10 +69,10 @@ export const access = sequelize.define('access', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
         },
     }, {
-        timestamps: false
+        timestamps: false,
     }
 );
 
