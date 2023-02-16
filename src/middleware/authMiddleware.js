@@ -14,14 +14,14 @@ export default (req, res, next) => {
 
   try {
     const token = req.headers.authorization.split(' ')[1];
-    process.stdout.write(`${token} \n`);
+    // process.stdout.write(`${token} \n`);
 
     if (!token) {
       return res.status(401).json({ message: 'User not authorized' });
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);
-    process.stdout.write(`decoded = ${decoded}`);
+    // process.stdout.write(`decoded = ${decoded}`);
     req.user = decoded;
 
     next();

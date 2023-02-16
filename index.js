@@ -6,7 +6,7 @@ import fileUpload from 'express-fileupload';
 import sequelize from './src/db.js';
 // import { User, File, Access, Comment } from './src/models/models.js';
 import router from './src/routes/index.js';
-// import errorHandler from './src/middleware/errorHandlingMiddleware.js';
+import errorHandler from './src/middleware/errorHandlingMiddleware.js';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -21,7 +21,7 @@ app.use(express.static(path.resolve(dirname, '/public')));
 app.use(fileUpload({}));
 app.use('/', router);
 
-// app.use(errorHandler);
+app.use(errorHandler);
 
 async function start() {
   try {

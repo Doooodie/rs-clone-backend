@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs/promises';
+import { constants } from 'fs';
 import { fileURLToPath } from 'url';
 
 import ApiError from '../error/api-error.js';
@@ -18,11 +19,11 @@ function generateJwt(id, name, email) {
 
 class UserController {
   static async registration(req, res, next) {
-    process.stdout.write(`user-controller: registration \n`);
+    // process.stdout.write(`user-controller: registration \n`);
 
     try {
       const { name, email, password } = req.body;
-      process.stdout.write(`name = ${name}, email = ${email}, password = ${password} \n`);
+      // process.stdout.write(`name = ${name}, email = ${email}, password = ${password} \n`);
 
       if (!name || !email || !password) {
         return next(ApiError.badRequest('input correct data'));
@@ -35,7 +36,7 @@ class UserController {
 
       const reqEmail = await User.findOne({ where: { email } });
       if (reqEmail) {
-        return next(ApiError.badRequest(`this e-mail «${email}» is already in use`));
+        return next(ApiError.badRequest(`e-mail «${email}» is already in use`));
       }
 
       const hashPassword = await bcrypt.hash(password, 4);
@@ -44,28 +45,36 @@ class UserController {
       try {
         newUser = await User.create({ name, email, password: hashPassword });
       } catch (e) {
-        next(ApiError.internal(e.message));
+        return next(ApiError.internal(e.message));
       }
 
       const token = generateJwt(newUser.id, newUser.name, newUser.email);
 
+      // check an folder /PUBLIC existence
+      try {
+        await fs.access(path.resolve(dirname, '..', '..', 'public'), constants.F_OK);
+      } catch (e) {
+        // process.stdout.write('folder PUBLIC does not exists. creating...');
+        await fs.mkdir(path.resolve(dirname, '..', '..', 'public'));
+      }
+
       // create a folder for new user into /PUBLIC
       try {
-        await fs.mkdir(path.resolve(dirname, '..', 'public', `${newUser.name}`));
+        await fs.mkdir(path.resolve(dirname, '..', '..', 'public', `${newUser.name}`));
       } catch (e) {
-        next(ApiError.internal(e.message));
+        return next(ApiError.internal(e.message));
       }
       // -----------------------------
       return res.json({ token });
     } catch (e) {
-      next(ApiError.badRequest(e.message));
+      return next(ApiError.badRequest(e.message));
     }
 
-    return null;
+    // return null;
   }
 
   static async login(req, res, next) {
-    process.stdout.white(`user-controller: login \n`);
+    // process.stdout.write(`user-controller: login \n`);
 
     const { name, email, password } = req.body;
 
