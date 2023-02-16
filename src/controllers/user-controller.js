@@ -18,11 +18,11 @@ function generateJwt(id, name, email) {
 
 class UserController {
   static async registration(req, res, next) {
-    process.stdout.white(`user-controller: registration \n`);
+    process.stdout.write(`user-controller: registration \n`);
 
     try {
       const { name, email, password } = req.body;
-      process.stdout.white(`name = ${name}, email = ${email}, password = ${password} \n`);
+      process.stdout.write(`name = ${name}, email = ${email}, password = ${password} \n`);
 
       if (!name || !email || !password) {
         return next(ApiError.badRequest('input correct data'));
