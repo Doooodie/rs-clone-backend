@@ -2,14 +2,14 @@
   "name": "rs-clone-backend",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "module",
   "engines": {
     "node": ">=16.0.0"
   },
   "scripts": {
-    "start": "npm run lint && node ./src/index.js",
-    "dev": "nodemon ./src/index.js",
+    "start": "npm run lint && node index.js",
+    "dev": "nodemon index.js",
     "lint": "eslint --ignore-path .gitignore .",
     "fix": "eslint --fix --ignore-path .gitignore ."
   },
@@ -17,11 +17,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
+    "jsonwebtoken": "^9.0.0",
     "pg": "^8.9.0",
     "pg-hstore": "^2.3.4",
+    "postgre": "^0.1.8",
     "sequelize": "^6.28.0",
     "uuid": "^9.0.0"
   },

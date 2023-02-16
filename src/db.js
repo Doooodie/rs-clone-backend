@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-const DB_NAME = 'rs-clone';
+const DB_NAME = 'postgres';
 const DB_USER = 'postgres';
 const DB_PASSWORD = 'user';
 const DB_HOST = 'localhost';

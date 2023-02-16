@@ -1,10 +1,11 @@
+// import { Comment } from '.././models/models.js';
+
 class CommentController {
-  // TODO: rewrite class
-  async create(req, res) {
+  static async create(req, res) {
     res.json({ message: 'comment-controller: create' });
   }
 
-  async delete(req, res) {
+  static async delete(req, res) {
     res.json({ message: 'comment-controller: delete' });
   }
 }
