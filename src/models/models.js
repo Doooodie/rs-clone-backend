@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db.js';
 
-export const user = sequelize.define(
+export const User = sequelize.define(
   'user',
   {
     id: {
@@ -26,7 +26,7 @@ export const user = sequelize.define(
   },
 );
 
-export const file = sequelize.define(
+export const File = sequelize.define(
   'file',
   {
     id: {
@@ -50,13 +50,16 @@ export const file = sequelize.define(
       type: DataTypes.STRING,
       unique: true,
     },
+    isFile: {
+      type: DataTypes.BOOLEAN,
+    },
   },
   {
-    timestamps: false,
+    timestamps: true,
   },
 );
 
-export const comment = sequelize.define(
+export const Comment = sequelize.define(
   'comment',
   {
     id: {
@@ -74,7 +77,7 @@ export const comment = sequelize.define(
   },
 );
 
-export const access = sequelize.define(
+export const Access = sequelize.define(
   'access',
   {
     id: {
@@ -88,17 +91,17 @@ export const access = sequelize.define(
   },
 );
 
-user.hasMany(file, { foreignKey: 'userId' });
-file.belongsTo(user);
+User.hasMany(File, { foreignKey: 'userId' });
+File.belongsTo(User);
 
-user.hasMany(comment, { foreignKey: 'userId' });
-comment.belongsTo(user);
+User.hasMany(Comment, { foreignKey: 'userId' });
+Comment.belongsTo(User);
 
-file.hasMany(comment, { foreignKey: 'fileId' });
-comment.belongsTo(file);
+File.hasMany(Comment, { foreignKey: 'fileId' });
+Comment.belongsTo(File);
 
-user.hasMany(access, { foreignKey: 'userId' });
-access.belongsTo(user);
+User.hasMany(Access, { foreignKey: 'userId' });
+Access.belongsTo(User);
 
-file.hasMany(access, { foreignKey: 'fileId' });
-access.belongsTo(file);
+File.hasMany(Access, { foreignKey: 'fileId' });
+Access.belongsTo(File);

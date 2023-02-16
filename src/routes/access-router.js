@@ -2,9 +2,8 @@ import Router from 'express';
 import AccessController from '../controllers/access-controller.js';
 
 const router = new Router();
-const accessController = new AccessController();
 
-router.post('/:id', accessController.create);
-router.delete('/:id', accessController.delete);
+router.post('/:id', AccessController.create);
+router.delete('/:id', AccessController.delete);
 
 export default router;

@@ -2,14 +2,14 @@
   "name": "rs-clone-backend",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "module",
   "engines": {
     "node": ">=16.0.0"
   },
   "scripts": {
-    "start": "npm run lint && node ./src/index.js",
-    "dev": "nodemon ./src/index.js",
+    "start": "npm run lint && node index.js",
+    "dev": "nodemon index.js",
     "lint": "eslint --ignore-path .gitignore .",
     "fix": "eslint --fix --ignore-path .gitignore ."
   },

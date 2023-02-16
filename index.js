@@ -1,13 +1,12 @@
+import path from 'path';
 import express from 'express';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import sequelize from './db.js';
-// TODO: remove next line if imports are not necessary
-// import { user, file, access, comment } from './models/models.js';
-import router from './routes/index.js';
-import errorHandler from './middleware/errorHandlingMiddleware.js';
+import sequelize from './src/db.js';
+// import { User, File, Access, Comment } from './src/models/models.js';
+import router from './src/routes/index.js';
+import errorHandler from './src/middleware/errorHandlingMiddleware.js';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -29,10 +28,10 @@ async function start() {
     app.listen(PORT, async () => {
       await sequelize.authenticate();
       await sequelize.sync();
-      process.stdout.write(`Server is running. PORT: 2023`);
+      process.stdout.write(`Server is running. PORT: ${PORT} \n`);
     });
   } catch (e) {
-    process.stdout.write(e);
+    process.stdout.write(`${e} \n`);
   }
 }
 
