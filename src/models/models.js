@@ -36,19 +36,22 @@ export const File = sequelize.define(
     },
     name: {
       type: DataTypes.STRING,
+      required: true,
       primaryKey: false,
     },
     size: {
       type: DataTypes.INTEGER,
+      required: true,
       primaryKey: false,
     },
     info: {
       type: DataTypes.STRING,
       unique: false,
     },
-    img: {
+    filePath: {
       type: DataTypes.STRING,
       unique: true,
+      default: '',
     },
     isFile: {
       type: DataTypes.BOOLEAN,

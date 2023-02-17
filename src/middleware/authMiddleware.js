@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET_KEY = 'badoon';
+const SECRET_KEY = 'badoone';
 
 export default (req, res, next) => {
   if (
@@ -17,7 +17,7 @@ export default (req, res, next) => {
     // process.stdout.write(`${token} \n`);
 
     if (!token) {
-      return res.status(401).json({ message: 'User not authorized' });
+      res.status(401).json({ message: 'User not authorized' });
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);

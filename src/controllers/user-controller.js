@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs/promises';
-import { constants } from 'fs';
 import { fileURLToPath } from 'url';
 
 import ApiError from '../error/api-error.js';
@@ -11,7 +10,7 @@ import { User } from '../models/models.js';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-const SECRET_KEY = 'badoon';
+const SECRET_KEY = 'badoone';
 
 function generateJwt(id, name, email) {
   return jwt.sign({ id, name, email }, SECRET_KEY, { expiresIn: '1h' });
@@ -26,17 +25,17 @@ class UserController {
       // process.stdout.write(`name = ${name}, email = ${email}, password = ${password} \n`);
 
       if (!name || !email || !password) {
-        return next(ApiError.badRequest('input correct data'));
+        next(ApiError.badRequest('input correct data'));
       }
 
       const reqName = await User.findOne({ where: { name } });
       if (reqName) {
-        return next(ApiError.badRequest(`user with name «${name}» already exists`));
+        next(ApiError.badRequest(`user with name «${name}» already exists`));
       }
 
       const reqEmail = await User.findOne({ where: { email } });
       if (reqEmail) {
-        return next(ApiError.badRequest(`e-mail «${email}» is already in use`));
+        next(ApiError.badRequest(`e-mail «${email}» is already in use`));
       }
 
       const hashPassword = await bcrypt.hash(password, 4);
@@ -45,32 +44,24 @@ class UserController {
       try {
         newUser = await User.create({ name, email, password: hashPassword });
       } catch (e) {
-        return next(ApiError.internal(e.message));
+        next(ApiError.internal(e.message));
       }
 
       const token = generateJwt(newUser.id, newUser.name, newUser.email);
-
-      // check an folder /PUBLIC existence
-      try {
-        await fs.access(path.resolve(dirname, '..', '..', 'public'), constants.F_OK);
-      } catch (e) {
-        // process.stdout.write('folder PUBLIC does not exists. creating...');
-        await fs.mkdir(path.resolve(dirname, '..', '..', 'public'));
-      }
 
       // create a folder for new user into /PUBLIC
       try {
         await fs.mkdir(path.resolve(dirname, '..', '..', 'public', `${newUser.name}`));
       } catch (e) {
-        return next(ApiError.internal(e.message));
+        next(ApiError.internal(e.message));
       }
       // -----------------------------
       return res.json({ token });
     } catch (e) {
-      return next(ApiError.badRequest(e.message));
+      next(ApiError.badRequest(e.message));
     }
 
-    // return null;
+    return null;
   }
 
   static async login(req, res, next) {
@@ -83,7 +74,7 @@ class UserController {
     try {
       user = await User.findOne({ where: { name, email } });
       if (!user) {
-        return next(ApiError.internal(`User named «${name}» with email «${email}» not found`));
+        next(ApiError.internal(`User named «${name}» with email «${email}» not found`));
       }
     } catch (e) {
       next(ApiError.internal(e.message));
@@ -91,16 +82,16 @@ class UserController {
 
     const comparePassword = bcrypt.compareSync(password, user.password);
     if (!comparePassword) {
-      return next(ApiError.internal('Wrong password specified'));
+      next(ApiError.internal('Wrong password specified'));
     }
 
     const token = generateJwt(user.id, user.name, user.email);
-    return res.json({ token });
+    res.json({ token });
   }
 
   static async check(req, res) {
     const token = generateJwt(req.user.id, req.user.name, req.user.email);
-    return res.json({ token });
+    res.json({ token });
   }
 }
 

@@ -1,7 +1,8 @@
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs/promises';
+// import { constants } from 'fs';
 import { fileURLToPath } from 'url';
-import { File } from '../models/models.js';
+import { File, User } from '../models/models.js';
 import ApiError from '../error/api-error.js';
 
 const filename = fileURLToPath(import.meta.url);
@@ -11,16 +12,50 @@ class FileController {
   static async create(req, res, next) {
     process.stdout.write(`file-controller: create \n`);
 
+    const { name, size, info, filePath, isFile, userId } = req.body;
+    const { file } = req.files;
+    process.stdout.write(
+      `name=${name}, size=${size}, info=${info}, filePath=${filePath}, isFile=${isFile}\n`,
+    );
+
+    const user = await User.findOne({ where: { id: userId } });
+    process.stdout.write(`userName = ${user.name}\n`);
+
+    const userRootPath = path.resolve(dirname, '..', '..', 'public', `${user.name}`);
+    process.stdout.write(`root path = ${userRootPath}\n`);
+
     try {
-      const { name, size, info } = req.body;
-      const { img } = req.files;
+      // если файл - записать по пути, если папка - создать папку по пути
+      if (`${isFile}` === 'true') {
+        if (filePath === '') {
+          process.stdout.write(`пишу в корень файл ${name}\n`);
+          await file.mv(path.resolve(userRootPath, name));
+        } else {
+          const fullPath = path.resolve(userRootPath, `${filePath}`);
+          process.stdout.write(`пишу в папку ${fullPath}\n`);
+          await file.mv(path.resolve(fullPath, name));
+        }
+      } else if (`${isFile}` === 'false') {
+        if (filePath === '') {
+          process.stdout.write(`пишу в корень папку ${name}\n`);
+          await fs.mkdir(path.resolve(userRootPath, name));
+        } else {
+          const fullPath = path.resolve(userRootPath, `${filePath}`);
+          process.stdout.write(`пишу папку ${name} в папку ${fullPath}\n`);
+          await fs.mkdir(path.resolve(fullPath, name));
+        }
+      }
 
-      const fileName = `${uuidv4()}.jpg`;
-      img.mv(path.resolve(dirname, '..', 'public', fileName));
+      const uploadedFile = await File.create({
+        name,
+        size,
+        info,
+        path: filePath,
+        isFile,
+        userId, // ссыль на родителя
+      });
 
-      const imageFile = await File.create({ name, size, info, img: fileName });
-
-      res.json(imageFile);
+      res.json(uploadedFile);
     } catch (e) {
       next(ApiError.badRequest(e.message));
     }
