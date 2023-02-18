@@ -53,8 +53,10 @@ export const File = sequelize.define(
       unique: true,
       default: '',
     },
-    isFile: {
-      type: DataTypes.BOOLEAN,
+    type: {
+      type: DataTypes.STRING,
+      unique: false,
+      default: 'file',
     },
   },
   {
@@ -62,49 +64,49 @@ export const File = sequelize.define(
   },
 );
 
-export const Comment = sequelize.define(
-  'comment',
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    text: {
-      type: DataTypes.STRING,
-      unique: false,
-    },
-  },
-  {
-    timestamps: false,
-  },
-);
+// export const Comment = sequelize.define(
+//   'comment',
+//   {
+//     id: {
+//       type: DataTypes.INTEGER,
+//       primaryKey: true,
+//       autoIncrement: true,
+//     },
+//     text: {
+//       type: DataTypes.STRING,
+//       unique: false,
+//     },
+//   },
+//   {
+//     timestamps: false,
+//   },
+// );
 
-export const Access = sequelize.define(
-  'access',
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-  },
-  {
-    timestamps: false,
-  },
-);
+// export const Access = sequelize.define(
+//   'access',
+//   {
+//     id: {
+//       type: DataTypes.INTEGER,
+//       primaryKey: true,
+//       autoIncrement: true,
+//     },
+//   },
+//   {
+//     timestamps: false,
+//   },
+// );
 
 User.hasMany(File, { foreignKey: 'userId' });
 File.belongsTo(User);
 
-User.hasMany(Comment, { foreignKey: 'userId' });
-Comment.belongsTo(User);
+// User.hasMany(Comment, { foreignKey: 'userId' });
+// Comment.belongsTo(User);
 
-File.hasMany(Comment, { foreignKey: 'fileId' });
-Comment.belongsTo(File);
+// File.hasMany(Comment, { foreignKey: 'fileId' });
+// Comment.belongsTo(File);
 
-User.hasMany(Access, { foreignKey: 'userId' });
-Access.belongsTo(User);
+// User.hasMany(Access, { foreignKey: 'userId' });
+// Access.belongsTo(User);
 
-File.hasMany(Access, { foreignKey: 'fileId' });
-Access.belongsTo(File);
+// File.hasMany(Access, { foreignKey: 'fileId' });
+// Access.belongsTo(File);

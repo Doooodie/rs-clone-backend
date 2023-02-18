@@ -8,51 +8,55 @@ import ApiError from '../error/api-error.js';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+function parseJwt(token) {
+  return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+}
+
 class FileController {
   static async create(req, res, next) {
     process.stdout.write(`file-controller: create \n`);
 
-    const { name, size, info, filePath, isFile, userId } = req.body;
-    const { file } = req.files;
+    const token = req.headers.authorization.split(' ')[1];
+
+    const userId = parseJwt(token).id;
+    process.stdout.write(`\nuserId = ${userId}\n`);
+
+    const { name, size, info, filePath, type } = req.body;
+    // const { name, size, info, filePath, type, userId } = req.body;
+
+    let { file } = {};
+    if (req.files) ({ file } = req.files);
+
     process.stdout.write(
-      `name=${name}, size=${size}, info=${info}, filePath=${filePath}, isFile=${isFile}\n`,
+      `name = ${name}, size = ${size}, info = ${info}, filePath = ${filePath}, type = ${type}\n`,
     );
 
-    const user = await User.findOne({ where: { id: userId } });
-    process.stdout.write(`userName = ${user.name}\n`);
+    const foundUser = await User.findOne({ where: { id: userId } });
+    process.stdout.write(`userName = ${foundUser.name}\n`);
 
-    const userRootPath = path.resolve(dirname, '..', '..', 'public', `${user.name}`);
+    const userRootPath = path.resolve(dirname, '..', '..', 'public', `${foundUser.name}`);
     process.stdout.write(`root path = ${userRootPath}\n`);
 
+    let truePath;
+    if (filePath === '') truePath = userRootPath;
+    else truePath = path.resolve(userRootPath, `${filePath}`);
+
     try {
-      // если файл - записать по пути, если папка - создать папку по пути
-      if (`${isFile}` === 'true') {
-        if (filePath === '') {
-          process.stdout.write(`пишу в корень файл ${name}\n`);
-          await file.mv(path.resolve(userRootPath, name));
-        } else {
-          const fullPath = path.resolve(userRootPath, `${filePath}`);
-          process.stdout.write(`пишу в папку ${fullPath}\n`);
-          await file.mv(path.resolve(fullPath, name));
-        }
-      } else if (`${isFile}` === 'false') {
-        if (filePath === '') {
-          process.stdout.write(`пишу в корень папку ${name}\n`);
-          await fs.mkdir(path.resolve(userRootPath, name));
-        } else {
-          const fullPath = path.resolve(userRootPath, `${filePath}`);
-          process.stdout.write(`пишу папку ${name} в папку ${fullPath}\n`);
-          await fs.mkdir(path.resolve(fullPath, name));
-        }
+      if (`${type}` === 'file') {
+        process.stdout.write(`пишу в папку ${truePath} файл ${name}\n`);
+        await file.mv(path.resolve(truePath, name));
+      } else {
+        process.stdout.write(`создаю в папке ${truePath} папку ${name}\n`);
+        await fs.mkdir(path.resolve(truePath, name));
       }
 
       const uploadedFile = await File.create({
         name,
         size,
         info,
-        path: filePath,
-        isFile,
-        userId, // ссыль на родителя
+        path: truePath,
+        type,
+        userId: foundUser.id, // ссыль на родителя
       });
 
       res.json(uploadedFile);
@@ -61,8 +65,21 @@ class FileController {
     }
   }
 
-  static async delete(_, res) {
+  static async delete(req, res, next) {
     process.stdout.write(`file-controller: delete \n`);
+
+    try {
+      // найти путь файла и удалить из базы
+      const file = await File.findOne({ where: { id: req.params.id } });
+      // const pathDelete = file.filePath;
+      await file.destroy();
+
+      // удалить из хранилища
+      // проверить, файл это или папка
+    } catch (e) {
+      next(ApiError.badRequest(e.message));
+    }
+
     res.json({ message: 'file-controller: delete' });
   }
 

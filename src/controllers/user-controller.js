@@ -40,11 +40,9 @@ class UserController {
 
       const hashPassword = await bcrypt.hash(password, 4);
 
-      let newUser;
-      try {
-        newUser = await User.create({ name, email, password: hashPassword });
-      } catch (e) {
-        next(ApiError.internal(e.message));
+      const newUser = await User.create({ name, email, password: hashPassword });
+      if (!newUser) {
+        next(ApiError.internal(`can't create new user`));
       }
 
       const token = generateJwt(newUser.id, newUser.name, newUser.email);
@@ -70,9 +68,17 @@ class UserController {
     const { name, email, password } = req.body;
 
     // find user in DB by name & email fields
+    // const user = await User.findOne({ where: { name, email } });
+    // if (!user) {
+    //   next(ApiError.internal(`User named «${name}» with email «${email}» not found`));
+    // }
+
     let user;
     try {
       user = await User.findOne({ where: { name, email } });
+      process.stdout.write(
+        `user.id = ${user.id}, user.name = ${user.name}, user.email = ${user.email}, user.password = ${user.password}`,
+      );
       if (!user) {
         next(ApiError.internal(`User named «${name}» with email «${email}» not found`));
       }
@@ -80,9 +86,19 @@ class UserController {
       next(ApiError.internal(e.message));
     }
 
-    const comparePassword = bcrypt.compareSync(password, user.password);
-    if (!comparePassword) {
-      next(ApiError.internal('Wrong password specified'));
+    // const comparePassword = bcrypt.compareSync(password, user.password);
+    // if (!comparePassword) {
+    //   next(ApiError.internal('Wrong password specified'));
+    // }
+
+    let comparePassword;
+    try {
+      comparePassword = bcrypt.compareSync(password, user.password);
+      if (!comparePassword) {
+        next(ApiError.internal('Wrong password specified'));
+      }
+    } catch (e) {
+      next(ApiError.internal(e.message));
     }
 
     const token = generateJwt(user.id, user.name, user.email);

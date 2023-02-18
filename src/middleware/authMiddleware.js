@@ -2,6 +2,10 @@ import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = 'badoone';
 
+// function parseJwt(token) {
+//   return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+// }
+
 export default (req, res, next) => {
   if (
     req.method !== 'GET' &&
@@ -21,7 +25,10 @@ export default (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, SECRET_KEY);
-    // process.stdout.write(`decoded = ${decoded}`);
+
+    // const a = parseJwt(token);
+    // process.stdout.write(`\ntoken.payload = { id=${a.id}, name=${a.name}, email=${a.email} }\n`);
+
     req.user = decoded;
 
     next();
