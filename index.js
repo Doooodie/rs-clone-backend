@@ -1,4 +1,5 @@
 import path from 'path';
+import * as dotenv from 'dotenv';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
@@ -10,6 +11,7 @@ import sequelize from './src/db.js';
 import router from './src/routes/index.js';
 import errorHandler from './src/middleware/errorHandlingMiddleware.js';
 
+dotenv.config();
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
