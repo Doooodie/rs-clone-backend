@@ -13,7 +13,7 @@ import errorHandler from './src/middleware/errorHandlingMiddleware.js';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 const app = express();
 
