@@ -1,4 +1,7 @@
+import * as dotenv from 'dotenv';
 import { Sequelize } from 'sequelize';
+
+dotenv.config();
 
 const { PGDATABASE, PGUSER, PGPASSWORD, PGHOST, PGPORT } = process.env;
 
