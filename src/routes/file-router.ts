@@ -1,8 +1,8 @@
-import Router from 'express';
+import { Router } from 'express';
 import FileController from '../controllers/file-controller.js';
 import authMiddleWare from '../middleware/authMiddleware.js';
 
-const router = new Router();
+const router = Router();
 
 router.post('/', authMiddleWare, FileController.create);
 router.delete('/:id', authMiddleWare, FileController.delete);
