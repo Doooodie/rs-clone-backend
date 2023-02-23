@@ -102,17 +102,15 @@ class UserController {
       }
       if (!comparePassword) {
         next(ApiError.internal('Wrong password specified'));
+      } else if (user && user.id) {
+        const token = generateJwt(user.id, user.name, user.email);
+        res.json({ token });
       }
     } catch (e) {
       let message;
       if (e instanceof Error) message = e.message;
       else message = String(e);
       next(ApiError.internal(message));
-    }
-
-    if (user && user.id) {
-      const token = generateJwt(user.id, user.name, user.email);
-      res.json({ token });
     }
   }
 

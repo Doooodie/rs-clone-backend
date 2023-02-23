@@ -16,12 +16,7 @@ const { PORT } = process.env;
 
 const app = express();
 
-app.use(
-  cors({
-    origin: ['http://localhost:3000/', 'https://doooodie-badoone-drive.vercel.app/'],
-    credentials: true,
-  }),
-);
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.resolve(dirname, '/public')));
 app.use(fileUpload({}));
