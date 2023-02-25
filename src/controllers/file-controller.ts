@@ -189,7 +189,7 @@ class FileController {
           // найти всех потомков в этой папке (на выходе - массив)
           const childList = await File.findAll({ where: { parentPath: foundFile.filePath } });
           if (childList) {
-            // отправить массив
+            // вернуть массив
             res.json(childList);
           } else {
             throw new Error(`can't read the children list of this folder from data base`);
@@ -207,18 +207,40 @@ class FileController {
     // res.json({ message: `file-controller: get file id = ${req.params}` });
   }
 
-  static async getAll(req: Request, res: Response, next: NextFunction) {
+  static async getRoot(req: Request, res: Response, next: NextFunction) {
     process.stdout.write(`file-controller: getAll\n`);
-    try {
-      // определить id пользователя из token и по нему выдать список ВСЕХ файлов этого пользоваталя
-      // или только в корне?
-    } catch (e) {
-      let message;
-      if (e instanceof Error) message = e.message;
-      else message = String(e);
-      next(ApiError.badRequest(message));
+
+    // определить id пользователя из token
+    const token: string = (req.headers.authorization as string).split(' ')[1];
+    const userId = parseJwt(token).id;
+    process.stdout.write(`\nuserId = ${userId}\n`);
+
+    const foundUser = await User.findOne({ where: { id: userId } });
+    if (foundUser) {
+      process.stdout.write(`userName = ${foundUser.name}\n`);
+
+      const userRootPath = path.resolve(dirname, '..', '..', 'public', `${foundUser.name}`);
+      process.stdout.write(`userRoot path = ${userRootPath}\n`);
+
+      try {
+        // найти всех потомков в этой корневой папке (на выходе - массив)
+        const childList = await File.findAll({ where: { parentPath: userRootPath } });
+        if (childList) {
+          // вернуть массив
+          res.json(childList);
+        } else {
+          throw new Error(`can't read the children list of root folder from data base`);
+        }
+      } catch (e) {
+        let message;
+        if (e instanceof Error) message = e.message;
+        else message = String(e);
+        next(ApiError.badRequest(message));
+      }
+      // res.json({ message: `file-controller: getAll` });
+    } else {
+      throw new Error(`user id=${userId} not found in the data base`);
     }
-    res.json({ message: `file-controller: getAll` });
   }
 }
 
