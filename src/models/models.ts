@@ -33,7 +33,19 @@ export const User = sequelize.define<UserModel>(
   },
 );
 
-export const File = sequelize.define(
+export interface FileModel
+  extends Model<InferAttributes<FileModel>, InferCreationAttributes<FileModel>> {
+  id?: number;
+  name: string;
+  size: number;
+  info: string;
+  filePath: string;
+  parentPath: string;
+  type: string;
+  userId?: number;
+}
+
+export const File = sequelize.define<FileModel>(
   'file',
   {
     id: {
@@ -58,6 +70,11 @@ export const File = sequelize.define(
     filePath: {
       type: DataTypes.STRING,
       unique: true,
+      defaultValue: '',
+    },
+    parentPath: {
+      type: DataTypes.STRING,
+      unique: false,
       defaultValue: '',
     },
     type: {
