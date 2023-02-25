@@ -15,30 +15,64 @@ function parseJwt(token: string) {
 }
 
 async function deleteDir(pathDelete: string) {
+  process.stdout.write(`вход в функцию deleteDir(${pathDelete})\nсписок файлов:\n`);
   // получить список файлов внутри этой папки
   try {
     const files = await fs.readdir(pathDelete);
     files.forEach(async (x) => {
-      process.stdout.write(`файл= ${x}\n`);
-      if ((await fs.stat(x)).isDirectory()) {
-        process.stdout.write(`вход в папку ${x}\n`);
-        await deleteDir(x);
+      // x - имя файла/папки
+      process.stdout.write(`файл = ${x}\n`);
+      if ((await fs.stat(path.resolve(pathDelete, x))).isDirectory()) {
+        process.stdout.write(`вход в папку ${path.resolve(pathDelete, x)}\n`);
+        await deleteDir(path.resolve(pathDelete, x));
         // удалить эту уже пустую папку
         // try {
-        //   await fs.rmdir(x);
+        //   process.stdout.write(`Внутри папки ${pathDelete} все поудалял, сейчас буду удалять ее\n`);
+        //   // из хранилища
+        //   await fs.rmdir(pathDelete);
+        //   // из БД
+        //   await File.destroy({
+        //     where: {
+        //       filePath: path.resolve(pathDelete),
+        //     },
+        //   });
         // } catch {
-        //   throw new Error(`не могу удалить пустую папку ${x}`);
+        //   throw new Error(`не могу удалить пустую папку ${pathDelete}\n`);
         // }
       } else {
         try {
-          process.stdout.write(`надо удалить файл ${x}\n`);
-          // await fs.unlink(x);
+          process.stdout.write(`пытаюсь удалить файл ${path.resolve(pathDelete, x)}\n`);
+          // try {
+          //   await fs.unlink(path.resolve(pathDelete, x));
+          // } catch {
+          //   throw new Error(`не могу удалить файл ${x}`);
+          // }
+          // удалить из базы
+          await File.destroy({
+            where: {
+              filePath: path.resolve(pathDelete, x),
+            },
+          });
         } catch (e) {
           // next(ApiError.badRequest(`can't delete file ${pathDelete}`));
-          process.stdout.write(`can't delete file ${x}\n`);
+          process.stdout.write(`can't delete file ${path.resolve(pathDelete, x)}\n`);
         }
       }
     });
+    // удалить эту уже пустую папку
+    try {
+      process.stdout.write(`Внутри папки ${pathDelete} все поудалял, сейчас буду удалять ее\n`);
+      // из хранилища
+      // await fs.rmdir(pathDelete, { recursive: true });
+      // из БД
+      await File.destroy({
+        where: {
+          filePath: path.resolve(pathDelete),
+        },
+      });
+    } catch {
+      throw new Error(`не могу удалить пустую папку ${pathDelete}\n`);
+    }
   } catch (e) {
     // надо это переработать
     let message;
@@ -116,14 +150,6 @@ class FileController {
           throw new Error(`файл не добавлен в базу`);
         }
         res.json(uploadedFile);
-        // res.json({
-        //   name,
-        //   size,
-        //   info,
-        //   filePath: truePath,
-        //   type,
-        //   userId: foundUser.id,
-        // });
       } catch (e) {
         let message;
         if (e instanceof Error) message = e.message;
@@ -135,6 +161,7 @@ class FileController {
     }
   }
 
+  // ---------------------- удаление --------------------------------
   static async delete(req: Request, res: Response, next: NextFunction) {
     process.stdout.write(`file-controller: delete\n`);
     try {
@@ -142,38 +169,60 @@ class FileController {
       const file: FileModel = (await File.findOne({ where: { id: req.params.id } })) as FileModel;
       if (file) {
         const pathDelete = file.filePath;
+        process.stdout.write(`pathDelete = ${pathDelete}\n`);
 
         try {
           // проверка на существование в хранилище
           await fs.access(pathDelete, constants.F_OK);
-          process.stdout.write('file exists');
+          process.stdout.write('file exists\n');
         } catch (e) {
           next(ApiError.badRequest((e as Error).message));
-          process.stdout.write('file does not exists');
+          process.stdout.write('file does not exists\n');
         }
 
         // удалить из хранилища
         // проверить, файл это или папка
         if ((await fs.stat(pathDelete)).isDirectory()) {
-          // рекурсионное удаление
+          // рекурсивное удаление
+          // сначала - БД
           await deleteDir(pathDelete);
+          // затем - хранилище
+          try {
+            await fs.rmdir(pathDelete, { recursive: true });
+          } catch {
+            throw new Error(`не могу удалить папку ${pathDelete}`);
+          }
         } else {
           try {
-            process.stdout.write(`удаляю файл ${pathDelete}`);
-            // await fs.unlink(pathDelete);
+            process.stdout.write(`удаляю файл ${pathDelete}\n`);
+            // удалить из базы
+            try {
+              await file.destroy();
+            } catch {
+              throw new Error(`can't delete from data base`);
+            }
+            // удалить из хранилища
+            try {
+              await fs.unlink(pathDelete);
+            } catch {
+              throw new Error(`can't delete from storage`);
+            }
           } catch (e) {
             // next(ApiError.badRequest(e.message));
-            next(ApiError.badRequest(`can't delete file ${pathDelete}`));
+            next(ApiError.badRequest(`can't delete file ${pathDelete}\n`));
           }
         }
 
         // await file.destroy(); // удалить из БД
+        res.json({ message: `file id=${req.params.id} was deleted` });
       }
     } catch (e) {
       next(ApiError.badRequest((e as Error).message));
     }
+    // res.json({ message: `delete` });
   }
 
+  // ------------------- запрос GET ---------------------
   static async get(req: Request, res: Response, next: NextFunction) {
     process.stdout.write(`file-controller: get\n`);
     try {
