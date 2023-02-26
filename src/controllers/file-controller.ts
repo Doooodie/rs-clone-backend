@@ -116,15 +116,25 @@ class FileController {
   }
 
   static async delete(req: Request, res: Response, next: NextFunction) {
+    const token: string = (req.headers.authorization as string).split(' ')[1];
+    const userId = parseJwt(token).id;
     try {
-      const file: FileModel = (await File.findOne({ where: { id: req.params.id } })) as FileModel;
-      if (file) {
-        const pathDelete = file.filePath;
+      const foundFile: FileModel = (await File.findOne({
+        where: { id: req.params.id },
+      })) as FileModel;
+      if (foundFile) {
+        if (userId !== foundFile.userId) {
+          throw new ApiError(403, `access to this resource is denied`);
+          // next(ApiError.forbidden(`access to this resource is denied`));
+        }
+
+        const pathDelete = foundFile.filePath;
 
         try {
           await fs.access(pathDelete, constants.F_OK);
         } catch (e) {
-          next(ApiError.badRequest((e as Error).message));
+          throw new ApiError(500, `can't get access to file ${pathDelete}`);
+          // next(ApiError.badRequest((e as Error).message));
         }
 
         if ((await fs.stat(pathDelete)).isDirectory()) {
@@ -133,38 +143,46 @@ class FileController {
           try {
             await fs.rm(pathDelete, { recursive: true });
           } catch {
-            throw new Error(`can't delete folder ${pathDelete}`);
+            throw new ApiError(500, `can't delete folder ${pathDelete}`);
           }
         } else {
           try {
             try {
-              await file.destroy();
+              await foundFile.destroy();
             } catch {
-              throw new Error(`can't delete from data base`);
+              throw new ApiError(500, `can't delete from data base`);
             }
 
             try {
               await fs.unlink(pathDelete);
             } catch {
-              throw new Error(`can't delete from storage`);
+              throw new ApiError(500, `can't delete from storage`);
             }
           } catch (e) {
-            next(ApiError.badRequest((e as Error).message));
+            throw new ApiError(500, `can't delete`);
+            // next(ApiError.badRequest((e as Error).message));
           }
         }
         res.json({ message: `file id=${req.params.id} was deleted` });
       }
     } catch (e) {
-      next(ApiError.badRequest((e as Error).message));
+      next(ApiError.badRequest((e as ApiError).message));
     }
   }
 
   static async get(req: Request, res: Response, next: NextFunction) {
+    const token: string = (req.headers.authorization as string).split(' ')[1];
+    const userId = parseJwt(token).id;
+
     try {
       const { id } = req.params;
 
       const foundFile = await File.findOne({ where: { id } });
       if (foundFile) {
+        if (userId !== foundFile.userId) {
+          throw new ApiError(403, `access to this resource is denied`);
+        }
+
         if (foundFile.type === 'file') {
           res.json(foundFile);
         } else {
@@ -172,11 +190,11 @@ class FileController {
           if (childList) {
             res.json(childList);
           } else {
-            throw new Error(`can't read the children list of this folder from data base`);
+            throw new ApiError(500, `can't read the children list of this folder from data base`);
           }
         }
       } else {
-        throw new Error(`cant't read file info from data base`);
+        throw new ApiError(500, `cant't read file info from data base`);
       }
     } catch (e) {
       let message;
@@ -198,7 +216,7 @@ class FileController {
         if (childList) {
           res.json(childList);
         } else {
-          throw new Error(`can't read the children list of root folder from data base`);
+          throw new ApiError(500, `can't read the children list of root folder from data base`);
         }
       } catch (e) {
         let message;
@@ -207,7 +225,7 @@ class FileController {
         next(ApiError.badRequest(message));
       }
     } else {
-      throw new Error(`user id=${userId} not found in the data base`);
+      throw new ApiError(500, `user id=${userId} not found in the data base`);
     }
   }
 }
