@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/', authMiddleWare, FileController.create);
 router.delete('/:id', authMiddleWare, FileController.delete);
-router.get('/:id', FileController.get);
+router.get('/:id', authMiddleWare, FileController.get);
+router.get('/', authMiddleWare, FileController.getRoot);
 
 export default router;

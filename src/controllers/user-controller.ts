@@ -10,6 +10,7 @@ import { User } from '../models/models.js';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+const rootPath = path.resolve(dirname, '..', '..', 'public');
 
 const SECRET_KEY = 'badoone';
 
@@ -31,38 +32,51 @@ class UserController {
       const { name, email, password } = req.body;
 
       if (!name || !email || !password) {
-        next(ApiError.badRequest('input correct data'));
+        // next(ApiError.badRequest('input correct data'));
+        throw new Error(`input correct data`);
       }
 
       const reqName = await User.findOne({ where: { name } });
       if (reqName) {
-        next(ApiError.badRequest(`user with name «${name}» already exists`));
+        // next(ApiError.badRequest(`user with name «${name}» already exists`));
+        throw new Error(`user with name «${name}» already exists`);
       }
 
       const reqEmail = await User.findOne({ where: { email } });
       if (reqEmail) {
-        next(ApiError.badRequest(`e-mail «${email}» is already in use`));
+        // next(ApiError.badRequest(`e-mail «${email}» is already in use`));
+        throw new Error(`e-mail «${email}» is already in use`);
       }
 
       const hashPassword = await bcrypt.hash(password, 4);
 
       const newUser = await User.create({ name, email, password: hashPassword });
       if (!newUser) {
-        next(ApiError.internal(`can't create new user`));
+        // next(ApiError.internal(`can't create new user`));
+        throw new Error(`can't create new user`);
       }
 
       if (newUser.id) {
         const token = generateJwt(newUser.id, newUser.name, newUser.email);
 
         try {
-          await fs.mkdir(path.resolve(dirname, '..', '..', 'public', `${newUser.name}`));
+          await fs.mkdir(path.resolve(rootPath, `${newUser.name}`));
+          // await fs.mkdir(path.resolve(dirname, '..', '..', 'public', `${newUser.name}`));
         } catch (e) {
           let message;
           if (e instanceof Error) message = e.message;
           else message = String(e);
           next(ApiError.internal(message));
         }
-        return res.json({ token });
+        // return res.json({ token });
+        res.json({
+          token,
+          user: {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+          },
+        });
       }
     } catch (e) {
       let message;
@@ -104,7 +118,15 @@ class UserController {
         next(ApiError.internal('Wrong password specified'));
       } else if (user && user.id) {
         const token = generateJwt(user.id, user.name, user.email);
-        res.json({ token });
+        // res.json({ token });
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          },
+        });
       }
     } catch (e) {
       let message;
