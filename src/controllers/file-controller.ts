@@ -1,4 +1,4 @@
-import path from 'path';
+import path, { resolve } from 'path';
 import fs, { constants } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express';
@@ -164,6 +164,62 @@ class FileController {
           }
         }
         res.json({ message: `file id=${req.params.id} was deleted` });
+      }
+    } catch (e) {
+      next(ApiError.badRequest((e as ApiError).message));
+    }
+  }
+
+  static async update(req: Request, res: Response, next: NextFunction) {
+    const token: string = (req.headers.authorization as string).split(' ')[1];
+    const { name, info } = req.body;
+    const userId = parseJwt(token).id;
+    try {
+      const foundFile: FileModel = (await File.findOne({
+        where: { id: req.params.id },
+      })) as FileModel;
+      if (foundFile) {
+        if (userId !== foundFile.userId) {
+          throw new ApiError(403, `access to this resource is denied`);
+          // next(ApiError.forbidden(`access to this resource is denied`));
+        }
+
+        const pathUpdate = foundFile.filePath;
+
+        try {
+          await fs.access(pathUpdate, constants.F_OK);
+        } catch (e) {
+          throw new ApiError(500, `can't get access to file ${pathUpdate}`);
+          // next(ApiError.badRequest((e as Error).message));
+        }
+
+        if ((await fs.stat(pathUpdate)).isDirectory()) {
+          process.stdout.write(`we don't update folders`);
+        } else {
+          try {
+            const newFilePath = path.resolve(foundFile.parentPath, name);
+            try {
+              if (name !== foundFile.name) {
+                process.stdout.write(`try to rename file ${pathUpdate} to ${newFilePath}`);
+                await fs.rename(pathUpdate, newFilePath);
+              } else {
+                process.stdout.write(`переименовывать не будем\n`);
+              }
+            } catch {
+              throw new ApiError(500, `can't rename file\n`);
+            }
+
+            try {
+              await foundFile.update({ name, info, filePath: newFilePath });
+            } catch {
+              throw new ApiError(500, `can't update to data base\n`);
+            }
+          } catch (e) {
+            throw new ApiError(500, `can't update\n`);
+            // next(ApiError.badRequest((e as Error).message));
+          }
+        }
+        res.json({ message: `file id=${req.params.id} was updated` });
       }
     } catch (e) {
       next(ApiError.badRequest((e as ApiError).message));
