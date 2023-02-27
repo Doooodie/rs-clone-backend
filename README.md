@@ -86,7 +86,7 @@ Creates a new user, returns JWT and json data about user.
 
 </details>
 
-## **User Login**
+## **Login User**
 
 Return JWT and json data about user.
 
@@ -166,7 +166,8 @@ Upload file or folder to a user storage. Returns json data about uploaded file o
 
 - **Headers:**
 
-  `"Authorization": "Bearer <JWT>"`
+  `'Content-Type': 'Multipart/form-data'`
+  `'Authorization': 'Bearer <JWT>'`
 
 - **URL Params**
 
@@ -186,7 +187,7 @@ Upload file or folder to a user storage. Returns json data about uploaded file o
   filePath: "folder3",
   type: "file",
   userId: 1,
-  file:
+  file: <attached_file>
   ```
 
 - **Success Response:**
@@ -245,7 +246,7 @@ Returns json data about file in a storage. Returns json data about files and fol
 
 - **Headers:**
 
-  `"Authorization": "Bearer <JWT>"`
+  `'Authorization': 'Bearer <JWT>'`
 
 - **URL Params**
 
@@ -339,7 +340,7 @@ Returns json data about files and folders within a root user folder
 
 - **Headers:**
 
-  `"Authorization": "Bearer <JWT>"`
+  `'Authorization': 'Bearer <JWT>'`
 
 - **URL Params**
 
@@ -445,7 +446,7 @@ Delete specified file or folder from a user storage
 
 - **Headers:**
 
-  `"Authorization": "Bearer <JWT>"`
+  `'Authorization': 'Bearer <JWT>'`
 
 - **URL Params**
 
