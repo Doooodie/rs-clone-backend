@@ -16,6 +16,10 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 const { PORT, PGHOST } = process.env;
+console.log(PGHOST);
+console.log(PGHOST === 'localhost');
+console.log(filename);
+console.log(dirname);
 
 const app = express();
 const staticPath = PGHOST === 'localhost' ? '../public' : '../app/public';
