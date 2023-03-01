@@ -1,5 +1,4 @@
 import path from 'path';
-import * as dotenv from 'dotenv';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
@@ -10,23 +9,16 @@ import sequelize from './db.js';
 import router from './routes/index.js';
 import errorHandler from './middleware/errorHandlingMiddleware.js';
 
-dotenv.config();
-
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-const { PORT, PGHOST } = process.env;
-console.log(PGHOST);
-console.log(PGHOST === 'localhost');
-console.log(filename);
-console.log(dirname);
+const { PORT } = process.env;
 
 const app = express();
-const staticPath = PGHOST === 'localhost' ? '../public' : '../app/public';
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.resolve(dirname, staticPath)));
+app.use(express.static(path.resolve(dirname, '../public')));
 app.use(fileUpload({}));
 app.use('/', router);
 
