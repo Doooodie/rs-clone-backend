@@ -20,6 +20,7 @@ Api for Rolling Scopes School task "RS-Clone".
   - [Upload File](https://github.com/Doooodie/rs-clone-backend#upload-file)
   - [Get File](https://github.com/Doooodie/rs-clone-backend#get-file)
   - [Get Root](https://github.com/Doooodie/rs-clone-backend#get-root)
+  - [Update File](https://github.com/Doooodie/rs-clone-backend#update-file)
   - [Delete File](https://github.com/Doooodie/rs-clone-backend#delete-file)
 
 ## **Create User**
@@ -427,6 +428,82 @@ Returns json data about files and folders within a root user folder
 - **Notes:**
 
   None
+
+</details>
+
+## **Update File**
+
+Update specified file into a user's storage.
+
+<details>
+
+- **URL**
+
+  /file/:id
+
+- **Method:**
+
+  `PUT`
+
+- **Headers:**
+
+  `'Authorization': 'Bearer <JWT>'`
+
+- **URL Params**
+
+  **Required:**
+
+  `id=[integer]`
+
+- **Query Params**
+
+  None
+
+- **Data Params**
+
+  ```typescript
+    {
+      name: string,
+      info: string
+    }
+  ```
+
+- **Success Response:**
+
+  - **Code:** 200 OK <br />
+    **Content:**
+    ```json
+    {
+      "message": "file with id=25 updated"
+    }
+    ```
+
+- **Error Response:**
+
+  - **Code:** 401 UNAUTHORIZED<br />
+  - **Content:**
+
+    User not authorized
+
+  OR
+
+  - **Code:** 403 FORBIDDEN<br />
+
+  - **Content:**
+
+    Error: access to this resource is denied
+
+  OR
+
+  - **Code:** 500 INTERNAL SERVER ERROR<br />
+
+  - **Content:**
+
+    Error: can't get access to file; can't update into data base
+
+- **Notes:**
+
+  Change the file name and information about it.
 
 </details>
 
