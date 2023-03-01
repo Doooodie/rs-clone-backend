@@ -23,7 +23,7 @@ interface IAuthCheckUser extends Request {
 }
 
 function generateJwt(id: number, name: string, email: string) {
-  return jwt.sign({ id, name, email }, SECRET_KEY, { expiresIn: '1h' });
+  return jwt.sign({ id, name, email }, SECRET_KEY, { expiresIn: '1y' });
 }
 
 class UserController {
@@ -32,19 +32,16 @@ class UserController {
       const { name, email, password } = req.body;
 
       if (!name || !email || !password) {
-        // next(ApiError.badRequest('input correct data'));
         throw new Error(`input correct data`);
       }
 
       const reqName = await User.findOne({ where: { name } });
       if (reqName) {
-        // next(ApiError.badRequest(`user with name «${name}» already exists`));
         throw new Error(`user with name «${name}» already exists`);
       }
 
       const reqEmail = await User.findOne({ where: { email } });
       if (reqEmail) {
-        // next(ApiError.badRequest(`e-mail «${email}» is already in use`));
         throw new Error(`e-mail «${email}» is already in use`);
       }
 
@@ -52,7 +49,6 @@ class UserController {
 
       const newUser = await User.create({ name, email, password: hashPassword });
       if (!newUser) {
-        // next(ApiError.internal(`can't create new user`));
         throw new Error(`can't create new user`);
       }
 
@@ -61,14 +57,12 @@ class UserController {
 
         try {
           await fs.mkdir(path.resolve(rootPath, `${newUser.name}`));
-          // await fs.mkdir(path.resolve(dirname, '..', '..', 'public', `${newUser.name}`));
         } catch (e) {
           let message;
           if (e instanceof Error) message = e.message;
           else message = String(e);
           next(ApiError.internal(message));
         }
-        // return res.json({ token });
         res.json({
           token,
           user: {
@@ -118,7 +112,6 @@ class UserController {
         next(ApiError.internal('Wrong password specified'));
       } else if (user && user.id) {
         const token = generateJwt(user.id, user.name, user.email);
-        // res.json({ token });
         res.json({
           token,
           user: {

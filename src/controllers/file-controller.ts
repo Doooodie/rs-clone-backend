@@ -1,4 +1,4 @@
-import path, { resolve } from 'path';
+import path from 'path';
 import fs, { constants } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express';
@@ -125,7 +125,6 @@ class FileController {
       if (foundFile) {
         if (userId !== foundFile.userId) {
           throw new ApiError(403, `access to this resource is denied`);
-          // next(ApiError.forbidden(`access to this resource is denied`));
         }
 
         const pathDelete = foundFile.filePath;
@@ -134,7 +133,6 @@ class FileController {
           await fs.access(pathDelete, constants.F_OK);
         } catch (e) {
           throw new ApiError(500, `can't get access to file ${pathDelete}`);
-          // next(ApiError.badRequest((e as Error).message));
         }
 
         if ((await fs.stat(pathDelete)).isDirectory()) {
@@ -160,7 +158,6 @@ class FileController {
             }
           } catch (e) {
             throw new ApiError(500, `can't delete`);
-            // next(ApiError.badRequest((e as Error).message));
           }
         }
         res.json({ message: `file id=${req.params.id} was deleted` });
@@ -181,7 +178,6 @@ class FileController {
       if (foundFile) {
         if (userId !== foundFile.userId) {
           throw new ApiError(403, `access to this resource is denied`);
-          // next(ApiError.forbidden(`access to this resource is denied`));
         }
 
         const pathUpdate = foundFile.filePath;
@@ -190,7 +186,6 @@ class FileController {
           await fs.access(pathUpdate, constants.F_OK);
         } catch (e) {
           throw new ApiError(500, `can't get access to file ${pathUpdate}`);
-          // next(ApiError.badRequest((e as Error).message));
         }
 
         if ((await fs.stat(pathUpdate)).isDirectory()) {
@@ -206,17 +201,16 @@ class FileController {
                 process.stdout.write(`переименовывать не будем\n`);
               }
             } catch {
-              throw new ApiError(500, `can't rename file\n`);
+              throw new ApiError(500, `can't rename file`);
             }
 
             try {
               await foundFile.update({ name, info, filePath: newFilePath });
             } catch {
-              throw new ApiError(500, `can't update to data base\n`);
+              throw new ApiError(500, `can't update to data base`);
             }
           } catch (e) {
-            throw new ApiError(500, `can't update\n`);
-            // next(ApiError.badRequest((e as Error).message));
+            throw new ApiError(500, `can't update`);
           }
         }
         res.json({ message: `file id=${req.params.id} was updated` });
