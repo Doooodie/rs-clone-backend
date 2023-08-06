@@ -9,5 +9,10 @@ export default new Sequelize(PGDATABASE, PGUSER, PGPASSWORD, {
   dialect: 'postgres',
   host: PGHOST,
   port: PGPORT,
-  ssl: true,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
 });
