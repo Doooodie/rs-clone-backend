@@ -8,7 +8,7 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "start": "npm run lint && ts-node src/index.ts",
+    "start": "npm run lint && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/index.ts",
     "dev": "nodemon src/index.ts",
     "lint": "eslint --ignore-path .gitignore .",
     "fix": "eslint --fix --ignore-path .gitignore ."
